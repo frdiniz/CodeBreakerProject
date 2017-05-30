@@ -1,3 +1,4 @@
+//variaveis para manipular inputs
 let answer = document.getElementById('answer');
 let attempt = document.getElementById('attempt');
 
@@ -5,6 +6,7 @@ let attempt = document.getElementById('attempt');
 const ANSWER_LENGTH = 4;
 const TURN_COMMA = 10000;
 
+//"controler"
 function guess() {
 
     let input = document.getElementById('user-guess');
@@ -15,7 +17,7 @@ function guess() {
     }
 
     //verifica input e para o codigo em caso de erro
-    //incrementa o contado caso nao seja
+    //incrementa o contador caso nao seja um erro
     if (!validateInput(input.value)) {
     	return false;
     } else {
@@ -36,7 +38,7 @@ function guess() {
     } 
 }
 
-//gera uma resposta aleatoria de 4 digitos
+//gera uma resposta aleatoria de 4 digitos - "model"
 function setHiddenFields (){
 
 	answer.value = Math.floor(Math.random() * TURN_COMMA);
@@ -49,9 +51,8 @@ function setHiddenFields (){
 	
 }
 
-//exibe mensagens
+//exibe mensagens - "view"
 function setMessage (body){
-
 	document.getElementById("message").innerHTML = body;
 }
 
@@ -68,80 +69,49 @@ function validateInput (validateInput) {
 	}
 }
 
-//core do game
+//core do game - "model"
 function getResults (input){
 	
 	//inicia contador da pontuação
 	let hits = 0;
 
 	//inicia div's do resultado, para somente acrescentar valores depois.
-	let result = `<div class="row"><span class="col-md-6"> ${input} </span><div class="col-md-6">`;
+	let html = `<div class="row"><span class="col-md-6"> ${input} </span><div class="col-md-6">`;
 
-    //conversão, number to string
-    let answerString = answer.value.toString();
-    let inputString = input.toString();
-
-	let answerArray = [];
-	let inputArray  = []; 
-
-	//converção, strings para arrays
-	for (let i = 0; i< ANSWER_LENGTH; i++){ 
-		answerArray.push( answerString.charAt([i]) );
-		inputArray.push(  inputString.charAt([i]) ); 
-	}
-
-	//percorre cada posição do Input
-	for ( let inputIndex in inputArray){ 
-		//a posição atual consta na Answer?
-
-		//compara a posição atual com todas as posições da Answer para responder
-		if ( answerArray.find( arrayCell => arrayCell === inputArray[inputIndex] ) ){
-            //TRUE => sim, consta.
-
-			//entretando, a posição é a correta?
-			let rightPosition = undefined;
-
-            //percorre cada posição da Answer para responder a pergunta anterior
-			for (let answerIndex in answerArray){
-				if(inputIndex === answerIndex && inputArray[inputIndex] === answerArray[answerIndex]){
-					rightPosition = true;
-				}
-			}
-
-			if (rightPosition){
-                //SIM
-				result += `<span class="glyphicon glyphicon-ok"></span>`;
-				hits += 1;
-				rightPosition = false;
-			} else {
-                //NAO, mas o valor sim
-				result += `<span class="glyphicon glyphicon-transfer"></span>`;
-			}
-
+	for ( let i = 0; i < ANSWER_LENGTH; i++) {
+		if (input.charAt(i) == answer.value.charAt(i)) {
+            //posição correta
+			html += `<span class="glyphicon glyphicon-ok"></span>`;
+            hits += 1;
+		} else if (answer.value.indexOf(input.charAt(i)) > -1){
+			//pertence ao grupo
+			html += `<span class="glyphicon glyphicon-transfer"></span>`;
 		} else {
-            //FALSE => não consta.
-			result += `<span class="glyphicon glyphicon-remove"></span>`;
+			//não pertence ao grupo
+			html += `<span class="glyphicon glyphicon-remove"></span>`;
 		}
 	}
 
 	// finaliza html e insere os dados
-	result += `</div></div>`;
-	document.getElementById("results").innerHTML += result;
+	html += `</div></div>`;
+	document.getElementById("results").innerHTML += html;
 
 	//checa se a resposta esta correta
 	return hits === ANSWER_LENGTH;
 }
 
-function showAnswer (display) {
-
-	document.getElementById("code").innerHTML = answer.value;
-	if (display) {
-		document.getElementById("code").classList.add("success");
+//altera classes css para success ou failure - "view"
+function showAnswer (success) {
+	let code = document.getElementById("code");
+	if (success) {
+		code.className += ' success';
 	} else {
-		document.getElementById("code").classList.add("failure");
+		code.className += ' failure';
 	}
+	code.innerHTML = answer.value;
 }
 
+//pergunta se o usuario deseja executar o jogo novamente - "view"
 function showReplay (){
 	document.getElementById("guessing-div").style.display = "none";
 	document.getElementById("replay-div").style.display = "block";
